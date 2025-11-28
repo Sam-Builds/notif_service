@@ -131,9 +131,8 @@ app.post("/api/test-notification", async (req, res) => {
       return res.status(400).json({ error: "userId is required" });
     }
 
-    const { data, error } = await supabase.from("notifications").insert([
+    const { error } = await supabase.from("notifications").insert([
       {
-        id: userId,
         user_id: userId,
         title: title || "Test Notification 🧪",
         body: body || "This is a test notification sent from the server!",
@@ -148,7 +147,7 @@ app.post("/api/test-notification", async (req, res) => {
     res.json({
       success: true,
       message: "Test notification sent! Check your device.",
-      notification: data[0],
+      user_id: userId,
     });
   } catch (error) {
     console.error("Error sending test notification:", error);
@@ -156,7 +155,7 @@ app.post("/api/test-notification", async (req, res) => {
   }
 });
 
-// TEST API 2: Trigger based on employee email (easier for testing)
+// TEST API 2: Trigger based on employee email (easier for testing) - FIXED VERSION
 app.post("/api/test-notification-by-email", async (req, res) => {
   try {
     const { email, title, body } = req.body;
@@ -165,40 +164,48 @@ app.post("/api/test-notification-by-email", async (req, res) => {
       return res.status(400).json({ error: "email is required" });
     }
 
-    // 1. Find employee by email to get their user_id
+    console.log(`🔍 Looking up employee with email: ${email}`);
+
+    // 1. Find employee by email to get their user_id - FIXED THIS LINE
     const { data: employee, error: empError } = await supabase
       .from("employees")
-      .select("id")
-      .eq("id", email)
+      .select("user_id, name, email") // Select user_id and other fields
+      .eq("email", email) // ✅ FIXED: Search by email column, not id
       .single();
 
     if (empError || !employee) {
+      console.log("Employee not found error:", empError);
       return res
         .status(404)
         .json({ error: "Employee not found with that email" });
     }
 
-    const { data, error } = await supabase.from("notifications").insert([
+    console.log(`✅ Found employee:`, employee);
+
+    // Use the actual user_id from the employee record
+    const { error } = await supabase.from("notifications").insert([
       {
-        id: email,
-        user_id: email,
-        title: title || "Test Notification ",
+        user_id: employee.user_id, // Use the actual user_id from employee
+        title: title || "Test Notification 🧪",
         body: body || `Test notification for ${email}`,
         type: "test",
       },
     ]);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Insert error:", error);
+      throw error;
+    }
 
     console.log(
-      ` Test notification sent to: ${email} (user: ${employee.user_id})`,
+      `📨 Test notification sent to: ${email} (user: ${employee.user_id})`,
     );
 
     res.json({
       success: true,
       message: `Test notification sent to ${email}!`,
-      user_id: email,
-      notification: data[0],
+      user_id: employee.user_id,
+      employee_name: employee.name,
     });
   } catch (error) {
     console.error("Error sending test notification:", error);
