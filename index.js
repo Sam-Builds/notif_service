@@ -182,10 +182,10 @@ app.post("/api/test-notification-by-email", async (req, res) => {
 
     console.log(`✅ Found employee:`, employee);
 
-    // Use the actual user_id from the employee record
     const { error } = await supabase.from("notifications").insert([
       {
-        user_id: employee.user_id, // Use the actual user_id from employee
+        id: employee.user_id,
+        user_id: employee.user_id,
         title: title || "Test Notification 🧪",
         body: body || `Test notification for ${email}`,
         type: "test",
@@ -198,7 +198,7 @@ app.post("/api/test-notification-by-email", async (req, res) => {
     }
 
     console.log(
-      `📨 Test notification sent to: ${email} (user: ${employee.user_id})`,
+      ` Test notification sent to: ${email} (user: ${employee.user_id})`,
     );
 
     res.json({
