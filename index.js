@@ -133,6 +133,7 @@ app.post("/api/test-notification", async (req, res) => {
 
     const { data, error } = await supabase.from("notifications").insert([
       {
+        id: userId,
         user_id: userId,
         title: title || "Test Notification 🧪",
         body: body || "This is a test notification sent from the server!",
@@ -177,12 +178,11 @@ app.post("/api/test-notification-by-email", async (req, res) => {
         .json({ error: "Employee not found with that email" });
     }
 
-    // 2. Send notification to that user
     const { data, error } = await supabase.from("notifications").insert([
       {
-        id: employee.user_id,
-        user_id: employee.user_id,
-        title: title || "Test Notification 🧪",
+        id: email,
+        user_id: email,
+        title: title || "Test Notification ",
         body: body || `Test notification for ${email}`,
         type: "test",
       },
@@ -191,13 +191,13 @@ app.post("/api/test-notification-by-email", async (req, res) => {
     if (error) throw error;
 
     console.log(
-      `📨 Test notification sent to: ${email} (user: ${employee.user_id})`,
+      ` Test notification sent to: ${email} (user: ${employee.user_id})`,
     );
 
     res.json({
       success: true,
       message: `Test notification sent to ${email}!`,
-      user_id: employee.user_id,
+      user_id: email,
       notification: data[0],
     });
   } catch (error) {
