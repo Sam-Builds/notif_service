@@ -180,6 +180,7 @@ app.post("/api/test-notification-by-email", async (req, res) => {
     // 2. Send notification to that user
     const { data, error } = await supabase.from("notifications").insert([
       {
+        id: employee.user_id,
         user_id: employee.user_id,
         title: title || "Test Notification 🧪",
         body: body || `Test notification for ${email}`,
