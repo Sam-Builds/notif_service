@@ -167,8 +167,8 @@ app.post("/api/test-notification-by-email", async (req, res) => {
     // 1. Find employee by email to get their user_id
     const { data: employee, error: empError } = await supabase
       .from("employees")
-      .select("user_id")
-      .eq("email", email)
+      .select("id")
+      .eq("id", email)
       .single();
 
     if (empError || !employee) {
